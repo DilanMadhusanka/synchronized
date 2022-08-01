@@ -10,7 +10,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 
 import com.example.asynchronized.helpers.ContactStoreCallback;
+import com.example.asynchronized.models.Category;
 import com.example.asynchronized.models.Contact;
+import com.example.asynchronized.models.Product;
 import com.example.asynchronized.utils.Constants;
 
 import java.util.ArrayList;
@@ -31,6 +33,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + Constants.KEY_ID + " INTEGER PRIMARY KEY," + Constants.KEY_NAME + " TEXT,"
                 + Constants.KEY_PH_NO + " TEXT" + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
+
+        String CREATE_PRODUCTS_TABLE = "CREATE TABLE " + Constants.TABLE_PRODUCTS + "("
+                + Constants.KEY_ID + " INTEGER PRIMARY KEY," + Constants.KEY_NAME + " TEXT,"
+                + Constants.KEY_PH_NO + " TEXT" + ")";
+        db.execSQL(CREATE_PRODUCTS_TABLE);
+
+        String CREATE_CATEGORIES_TABLE = "CREATE TABLE " + Constants.TABLE_CATEGORIES + "("
+                + Constants.KEY_ID + " INTEGER PRIMARY KEY," + Constants.KEY_NAME + " TEXT,"
+                + Constants.KEY_PH_NO + " TEXT" + ")";
+        db.execSQL(CREATE_CATEGORIES_TABLE);
     }
 
     @Override
@@ -38,6 +50,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + Constants.TABLE_CONTACTS);
+        db.execSQL("DROP TABLE IF EXISTS " + Constants.TABLE_PRODUCTS);
+        db.execSQL("DROP TABLE IF EXISTS " + Constants.TABLE_CATEGORIES);
 
         // Create tables again
         onCreate(db);
@@ -86,7 +100,84 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return insert;
     }
 
-    // code to get all contacts in a list view
+
+    // code to add the new product
+    public boolean addProducts(List<Product> products) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        StringBuilder sb = new StringBuilder();
+        String preFix = "";
+        for (Product product: products) {
+            sb.append(preFix);
+            preFix = ",";
+            sb.append("(");
+            sb.append(DatabaseUtils.sqlEscapeString(product.get_name()));
+            sb.append(",");
+            sb.append(DatabaseUtils.sqlEscapeString(product.get_phone_number()));
+            sb.append(")");
+        }
+
+        String query = "INSERT INTO products (name,phone_number) VALUES ";
+
+        query = query + sb.toString();
+
+        System.out.println(query);
+
+        boolean insert = false;
+        try {
+            db.execSQL(query);
+            System.out.println("___backupTable__ "+query);
+            insert = true;
+            contactStoreCallback.responseStatus(true);
+        } catch (SQLException e) {
+            System.out.println("___backupTable__ "+e.toString());
+        }
+        db.close();
+        return insert;
+    }
+
+    // code to add the new product
+    public boolean addCategories(List<Category> categories) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        StringBuilder sb = new StringBuilder();
+        String preFix = "";
+        for (Category category: categories) {
+            sb.append(preFix);
+            preFix = ",";
+            sb.append("(");
+            sb.append(DatabaseUtils.sqlEscapeString(category.get_name()));
+            sb.append(",");
+            sb.append(DatabaseUtils.sqlEscapeString(category.get_phone_number()));
+            sb.append(")");
+        }
+
+        String query = "INSERT INTO categories (name,phone_number) VALUES ";
+
+        query = query + sb.toString();
+
+        System.out.println(query);
+
+        boolean insert = false;
+        try {
+            db.execSQL(query);
+            System.out.println("___backupTable__ "+query);
+            insert = true;
+            contactStoreCallback.responseStatus(true);
+        } catch (SQLException e) {
+            System.out.println("___backupTable__ "+e.toString());
+        }
+        db.close();
+        return insert;
+    }
+
+
+
+
+
+    // code to get all contacts
     public List<Contact> getAllContacts() {
         List<Contact> contactList = new ArrayList<>();
         // Select All Query
