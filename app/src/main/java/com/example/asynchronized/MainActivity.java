@@ -3,14 +3,23 @@ package com.example.asynchronized;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.asynchronized.db.DatabaseHandler;
+import com.example.asynchronized.helpers.ContactStoreCallback;
+import com.example.asynchronized.models.Contact;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements ContactStoreCallback {
 
     private Button button;
 
     private GunFight gf;
+    private DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +30,13 @@ public class MainActivity extends AppCompatActivity {
 //        waitDemo.startExec();
 
         initViews();
-        initObjects();
+//        initObjects();
         initListeners();
+//        loadData();
+        new Thread() {
+            @Override public void run() { storeDataInDb(); }
+        }.start();
+
     }
 
     private void initViews() {
@@ -30,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initObjects() {
+
         gf = new GunFight();
 
         // Creating a new thread and invoking
@@ -40,15 +55,68 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initListeners() {
+        db = new DatabaseHandler(this, this);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Creating a new thread and invoking
                 // our reload method on it
-                new Thread() {
-                    @Override public void run() { gf.reload(); }
-                }.start();
+//                new Thread() {
+//                    @Override public void run() { gf.reload(); }
+//                }.start();
+
+                List<Contact> allContacts = db.getAllContacts();
+                System.out.println("Name: "+allContacts.size());
             }
         });
     }
+
+    private void loadData() {
+
+        db = new DatabaseHandler(this, this);
+
+        List<Contact> contacts = new ArrayList<>();
+
+        for (int i=0; i<10000; i++) {
+            Contact contact = new Contact();
+            contact.set_name("John Deo");
+            contact.set_phone_number("+94 715556666");
+            contacts.add(contact);
+        }
+
+        boolean b = db.addContacts(contacts);
+        Log.d("DB_Status", String.valueOf(b));
+    }
+
+    @Override
+    public void responseStatus(boolean status) {
+        System.out.println(
+                "Reloading the magazine and resuming "
+                        + "the thread using notify()");
+        new Thread() {
+            @Override public void run() { restartThread(); }
+        }.start();
+    }
+
+    private synchronized void storeDataInDb() {
+        for (int i=0;i<3;i++) {
+
+            loadData();
+            try {
+                System.out.println(
+                        "Invoking the wait() method");
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+    }
+
+    private synchronized void restartThread() {
+        notify();
+    }
+
+
 }
