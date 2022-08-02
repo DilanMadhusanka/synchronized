@@ -62,13 +62,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-//        ContentValues values = new ContentValues();
-//        values.put(Constants.KEY_NAME, contact.get_name());
-//        values.put(Constants.KEY_PH_NO, contact.get_phone_number());
-//
-//        db.insert(Constants.TABLE_CONTACTS, null, values);
-//        db.close();
-
         StringBuilder sb = new StringBuilder();
         String preFix = "";
         for (Contact contact: contacts) {
@@ -84,8 +77,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String query = "INSERT INTO contacts (name,phone_number) VALUES ";
 
         query = query + sb.toString();
-
-        System.out.println(query);
 
         boolean insert = false;
         try {
@@ -122,8 +113,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         query = query + sb.toString();
 
-        System.out.println(query);
-
         boolean insert = false;
         try {
             db.execSQL(query);
@@ -157,8 +146,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String query = "INSERT INTO categories (name,phone_number) VALUES ";
 
         query = query + sb.toString();
-
-        System.out.println(query);
 
         boolean insert = false;
         try {
