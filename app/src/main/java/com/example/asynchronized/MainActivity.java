@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity implements ContactStoreCallb
 
     private Button button;
 
-    private GunFight gf;
     private DatabaseHandler db;
 
     @Override
@@ -28,13 +27,9 @@ public class MainActivity extends AppCompatActivity implements ContactStoreCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        WaitDemo waitDemo = new WaitDemo();
-//        waitDemo.startExec();
-
         initViews();
-//        initObjects();
+        initObjects();
         initListeners();
-//        loadData();
         new Thread() {
             @Override public void run() { storeDataInDb(); }
         }.start();
@@ -46,14 +41,7 @@ public class MainActivity extends AppCompatActivity implements ContactStoreCallb
     }
 
     private void initObjects() {
-
-        gf = new GunFight();
-
-        // Creating a new thread and invoking
-        // our fire() method on it
-        new Thread() {
-            @Override public void run() { gf.fire(100); }
-        }.start();
+        db = new DatabaseHandler(this, this);
     }
 
     private void initListeners() {
@@ -61,40 +49,17 @@ public class MainActivity extends AppCompatActivity implements ContactStoreCallb
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Creating a new thread and invoking
-                // our reload method on it
-//                new Thread() {
-//                    @Override public void run() { gf.reload(); }
-//                }.start();
-
                 List<Contact> allContacts = db.getAllContacts();
                 System.out.println("Name: "+allContacts.size());
             }
         });
     }
 
-    private void loadData() {
-
-        db = new DatabaseHandler(this, this);
-
-        List<Contact> contacts = new ArrayList<>();
-
-        for (int i=0; i<10000; i++) {
-            Contact contact = new Contact();
-            contact.set_name("John Deo");
-            contact.set_phone_number("+94 715556666");
-            contacts.add(contact);
-        }
-
-        boolean b = db.addContacts(contacts);
-        Log.d("DB_Status", String.valueOf(b));
-    }
-
     @Override
     public void responseStatus(boolean status) {
-        System.out.println(
-                "Reloading the magazine and resuming "
-                        + "the thread using notify()");
+
+        System.out.println("Resuming the thread using notify()");
+
         new Thread() {
             @Override public void run() { restartThread(); }
         }.start();
@@ -103,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements ContactStoreCallb
     private synchronized void storeDataInDb() {
         for (int i=0;i<3;i++) {
 
-//            loadData();
             executeMethodsInQueue(i+1);
             try {
                 System.out.println(
